@@ -7,11 +7,15 @@ use App\Repository\CheeseListingRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Carbon\Carbon;
 use ApiPlatform\Core\Api\FilterInterface;
+
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ApiResource(
@@ -22,11 +26,18 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
  *  },
  * normalizationContext={"groups"={"cheese_listing:read"},"swagger_definition_name"="Read"},
  * denormalizationContext={"groups"={"cheese_listing:write"},"swagger_definition_name"="Write"},
- *  shortName="cheeses"
+ *  shortName="cheeses",
+ *  attributes={
+ *          "pagination_items_per_page"=10,
+ *          "formats"={"jsonld", "json", "html", "jsonhal", "csv"={"text/csv"}}
+ *     }
+
  * )
  * @ORM\Entity(repositoryClass=CheeseListingRepository::class),
  * @ApiFilter(BooleanFilter::class,properties={"isPublished"})
  * @ApiFilter(SearchFilter::class,properties={"title": "partial","description":"partial"})
+ * @ApiFilter(RangeFilter::class, properties={"price"})
+ * @ApiFilter(PropertyFilter::class)
  */
 class CheeseListing
 {
@@ -40,14 +51,20 @@ class CheeseListing
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"cheese_listing:read","cheese_listing:write"})
-     * 
+     * @Groups({"cheese_listing:read","cheese_listing:write", "user:read"})
+     * @Assert\NotBlank()
+     * @Assert\Length(
+     *     min=2,
+     *     max=50,
+     *     maxMessage="Describe your cheese in 50 chars or less"
+     * )
      */
     private $title;
 
     /**
      * @ORM\Column(type="text")
      * @Groups({"cheese_listing:read"})
+     * @Assert\NotBlank()
      */
     private $description;
 
@@ -55,7 +72,8 @@ class CheeseListing
      * The price of the delicious cheese, in cents.
      * 
      * @ORM\Column(type="integer")
-     * @Groups({"cheese_listing:read","cheese_listing:write"})
+     * @Groups({"cheese_listing:read","cheese_listing:write", "user:read"})
+     * @Assert\NotBlank()
      */
     private $price;
 
@@ -68,6 +86,14 @@ class CheeseListing
      * @ORM\Column(type="boolean")
      */
     private $isPublished=false;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="cheeseListings")
+     * @ORM\JoinColumn(nullable=false)
+     * @Groups({"cheese_listing:read", "cheese_listing:write"})
+     * @Assert\Valid()
+     */
+    private $owner;
 
     public function __construct(string $title=null)
     {
@@ -84,17 +110,19 @@ class CheeseListing
     {
         return $this->title;
     }
-
-    // public function setTitle(string $title): self
-    // {
-    //     $this->title = $title;
-
-    //     return $this;
-    // }
-
     public function getDescription(): ?string
     {
         return $this->description;
+    }
+    /**
+    * @Groups("cheese_listing:read")
+    */
+    public function getShortDescription(): ?string
+    {
+        if (strlen($this->description) < 40) {
+            return $this->description;
+        }
+        return substr($this->description, 0, 40).'...';
     }
     public function setDescription(string $description): self
     {
@@ -148,6 +176,18 @@ class CheeseListing
     public function setIsPublished(bool $isPublished): self
     {
         $this->isPublished = $isPublished;
+
+        return $this;
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): self
+    {
+        $this->owner = $owner;
 
         return $this;
     }
