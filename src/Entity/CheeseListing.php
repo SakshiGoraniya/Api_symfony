@@ -35,7 +35,12 @@ use Symfony\Component\Validator\Constraints as Assert;
  * )
  * @ORM\Entity(repositoryClass=CheeseListingRepository::class),
  * @ApiFilter(BooleanFilter::class,properties={"isPublished"})
- * @ApiFilter(SearchFilter::class,properties={"title": "partial","description":"partial"})
+ * @ApiFilter(SearchFilter::class,properties={
+ *      "title": "partial",
+ *      "description":"partial",
+ *      "owner": "exact",
+ *      "owner.username": "partial"
+ * })
  * @ApiFilter(RangeFilter::class, properties={"price"})
  * @ApiFilter(PropertyFilter::class)
  */
@@ -51,7 +56,7 @@ class CheeseListing
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"cheese_listing:read","cheese_listing:write", "user:read"})
+     * @Groups({"cheese_listing:read","cheese_listing:write", "user:read","user:write"})
      * @Assert\NotBlank()
      * @Assert\Length(
      *     min=2,
@@ -63,7 +68,7 @@ class CheeseListing
 
     /**
      * @ORM\Column(type="text")
-     * @Groups({"cheese_listing:read"})
+     * @Groups({"cheese_listing:read","user:write"})
      * @Assert\NotBlank()
      */
     private $description;
@@ -72,7 +77,7 @@ class CheeseListing
      * The price of the delicious cheese, in cents.
      * 
      * @ORM\Column(type="integer")
-     * @Groups({"cheese_listing:read","cheese_listing:write", "user:read"})
+     * @Groups({"cheese_listing:read","cheese_listing:write", "user:read","user:write"})
      * @Assert\NotBlank()
      */
     private $price;
@@ -90,7 +95,7 @@ class CheeseListing
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="cheeseListings")
      * @ORM\JoinColumn(nullable=false)
-     * @Groups({"cheese_listing:read", "cheese_listing:write"})
+     * @Groups({"cheese_listing:read","cheese_listing:write"})
      * @Assert\Valid()
      */
     private $owner;
@@ -132,7 +137,7 @@ class CheeseListing
     /**
      * The description of the cheese as raw text.
      *
-     * @Groups("cheese_listing:write")
+     * @Groups("cheese_listing:write","user:write")
      * @SerializedName("description")
      */
     public function setTextDescription(string $description): self

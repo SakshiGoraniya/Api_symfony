@@ -11,6 +11,7 @@
         "doctrine/annotations": "^1.0",
         "doctrine/doctrine-bundle": "^2.6",
         "doctrine/doctrine-migrations-bundle": "^3.2",
+        "symfony/webpack-encore-bundle": "^1.6",
         "doctrine/orm": "^2.11",
         "nelmio/cors-bundle": "^2.2",
         "nesbot/carbon": "^2.57",

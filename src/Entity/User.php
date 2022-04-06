@@ -12,6 +12,13 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\RangeFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use Carbon\Carbon;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -19,6 +26,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *      normalizationContext={"groups"={"user:read"}},
  *      denormalizationContext={"groups"={"user:write"}},
  * )
+ * @ApiFilter(PropertyFilter::class)
  * @UniqueEntity(fields={"username"})
  * @UniqueEntity(fields={"email"})
  */
@@ -56,10 +64,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @Assert\NotBlank()
      */
     private $username;
-
     /**
-     * @ORM\OneToMany(targetEntity=CheeseListing::class, mappedBy="owner")
-     * @Groups("user:read","cheese_listing:read","user:write")
+     * @ORM\OneToMany(targetEntity="App\Entity\CheeseListing", mappedBy="owner",cascade={"persist"},orphanRemoval=true)
+     * @Groups({"user:read", "user:write"})
+     * @Assert\Valid()
      */
     private $cheeseListings;
 
