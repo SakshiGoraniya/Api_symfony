@@ -23,10 +23,9 @@ use Symfony\Component\Serializer\Annotation\SerializedName;
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ApiResource(
- *      security="is_granted('ROLE_USER')",
  *      collectionOperations={
- *          "get",
- *          "post"={"security"="is_granted('IS_AUTHENTICATED_ANONYMOUSLY')"},
+ *         "get"={"security"="is_granted('ROLE_USER')"},
+ *          "post"={"Security"="is_granted('IS_AUTHENTICATED_ANONYMOUSLY')"},
  *     },
  *     itemOperations={
  *          "get"={"security"="is_granted('ROLE_USER')"},
@@ -64,9 +63,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var string The hashed password
      * @ORM\Column(type="string")
-     * @Groups({"user:write"})
      */
     private $password;
+
+    /**
+     * @Groups("user:write")
+     * @SerializedName("password")
+     * @Assert\NotBlank()
+     */
+    private $plainPassword;
 
     /**
      * @ORM\Column(type="string", length=255,unique=true)
@@ -152,7 +157,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function eraseCredentials()
     {
         // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+        $this->plainPassword = null;
     }
 
     public function getUsername(): ?string
@@ -194,6 +199,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             }
         }
 
+        return $this;
+    }
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+    public function setPlainPassword(string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
         return $this;
     }
 }
