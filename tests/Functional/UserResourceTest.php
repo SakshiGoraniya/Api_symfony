@@ -2,6 +2,7 @@
 
 namespace App\Tests\Functional;
 
+use App\Entity\User;
 use App\Test\CustomApiTestCase;
 use Hautelook\AliceBundle\PhpUnit\ReloadDatabaseTrait;
 
@@ -20,6 +21,7 @@ class UserResourceTest extends CustomApiTestCase
                 'password' => 'brie'
             ]
         ]);
+        
         $this->assertResponseStatusCodeSame(201);
 
         $this->logIn($client, 'sakshi@example.com','brie');
@@ -30,13 +32,18 @@ class UserResourceTest extends CustomApiTestCase
         $user = $this->createUserAndLogIn($client, 'cheeseplease@example.com', 'foo');
         $client->request('PUT', '/api/users/'.$user->getId(), [
             'json' => [
-                'username' => 'newusername'
+                'username' => 'newusername',
+                'roles' => ['ROLE_ADMIN'] // will be ignored
             ]
         ]);
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains([
             'username' => 'newusername'
         ]);
+        $em = $this->getEntityManager();
+        /** @var User $user */
+        $user = $em->getRepository(User::class)->find($user->getId());
+        $this->assertEquals(['ROLE_USER'], $user->getRoles());
     }
 
     public function testGetUser()

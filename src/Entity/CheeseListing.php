@@ -32,8 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *        "security_message"="Only the creator can edit a cheese listing"},
  *      "delete"={"security"="is_granted('ROLE_ADMIN')"}     
  *  },
- * normalizationContext={"groups"={"cheese_listing:read"},"swagger_definition_name"="Read"},
- * denormalizationContext={"groups"={"cheese_listing:write"},"swagger_definition_name"="Write"},
+ *
  *  shortName="cheeses",
  *  attributes={
  *          "pagination_items_per_page"=10,
