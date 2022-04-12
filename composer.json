@@ -94,6 +94,8 @@
         "symfony/maker-bundle": "^1.38",
         "symfony/phpunit-bridge": "^6.0",
         "symfony/stopwatch": "6.0.*",
-        "symfony/web-profiler-bundle": "6.0.*"
+        "symfony/web-profiler-bundle": "6.0.*",
+        "doctrine/doctrine-fixtures-bundle": "^3.3",
+        "zenstruck/foundry": "^1.1"
     }
 }
