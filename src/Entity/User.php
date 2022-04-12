@@ -35,8 +35,7 @@ use Symfony\Component\Serializer\Annotation\SerializedName;
  *          "put"={"security"="is_granted('ROLE_USER') and object == user"},
  *          "delete"={"security"="is_granted('ROLE_ADMIN')"}
  *     },
- *      normalizationContext={"groups"={"user:read"}},
- *      denormalizationContext={"groups"={"user:write"}},
+ *   
  * )
  * @ApiFilter(PropertyFilter::class)
  * @UniqueEntity(fields={"username"})
@@ -80,7 +79,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @ORM\Column(type="string", length=255,unique=true)
-     * @Groups({"user:read", "user:write", "cheese_listing:item:get", "cheese_listing:write"})
+     * @Groups({"user:read", "user:write", "cheese:item:get", "cheese:write"})
      * @Assert\NotBlank()
      */
     private $username;
@@ -92,7 +91,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $cheeseListings;
      /**
      * @ORM\Column(type="string", length=50, nullable=true)
-     * @Groups({"admin:read", "user:write"})
+     * @Groups({"admin:read","owner:read","user:write"})
      */
     private $phoneNumber;
     public function __construct()
