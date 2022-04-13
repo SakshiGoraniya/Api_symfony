@@ -20,6 +20,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ApiResource(
+ *     normalizationContext={"groups"={"cheese:read"}},
+ *     denormalizationContext={"groups"={"cheese:write"}},
  *  collectionOperations=
  * {
  * "get",
@@ -98,6 +100,7 @@ class CheeseListing
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups({"cheese:write"})
      */
     private $isPublished=false;
 
